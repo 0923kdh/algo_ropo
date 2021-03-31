@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int n, l, answer, board[100][100];
+int n, l, answer, isFlatRoad, board[100][100], visited[100][100];
 
 void input()
 {
@@ -16,51 +16,53 @@ void input()
 	}
 }
 
-void checkRoad(queue<int> q)
+bool checkRoad(int& y, int& x)
 {
-	int prevHeight = q.front();
-	q.pop();
-	int flatRoad = 1;
-	while (q.size())
+	int cur = board[y][x];
+	int next = board[y][x + 1];
+
+	//차이가 2 이상날때는 지나갈 수 없다.
+	if (abs(board[y][x] - board[y][x + 1]) > 1)
+		return false;
+
+	//평평한 길은 일단 지나간다.
+	if (board[y][x] - board[y][x + 1] == 0)
+		return true;
+
+	//높은 경사로 //오른쪽이 더 큰 경우
+	if (board[y][x] - board[y][x + 1] == -1)
 	{
-		int curHeight = q.front();
-
-		//높이가 2이상 차이나면 길을 건널 수 없다.
-		if (abs(prevHeight - curHeight) > 1)
-			break;
-
-		//내려가는 경우
-		if (prevHeight - curHeight == 1)
+		for (int i = 0; i < l; i++)
 		{
-			prevHeight = curHeight;
-			flatRoad = 1;
-			q.pop();
-			continue;
+			if (visited[y][x - i])
+				return false;
 		}
 
-		//올라가는 경우
-		if (prevHeight - curHeight == -1)
+		for (int i = 1; i < l; i++)
 		{
-			if (flatRoad / l == 0)
-				break;
+			if (x - i < 0)
+				return false;
 
-			prevHeight = curHeight;
-			flatRoad = 1;
-			q.pop();
-			continue;
+			if (board[y][x] - board[y][x - i] != 0)
+				return false;
 		}
-
-		if (abs(prevHeight - curHeight) == 0)
+	}
+	//낮은 경사로 //왼쪽이 더 큰 경우
+	else if (board[y][x] - board[y][x + 1] == 1)
+	{
+		for (int i = 1; i <= l; i++)
 		{
-			flatRoad++;
-		}
+			if (x + i >= n)
+				return false;
 
-		prevHeight = curHeight;
-		q.pop();
+			if (board[y][x + i] - board[y][x + i + 1] != 0)
+				return false;
+
+			visited[y][x + i] = 1;
+		}
 	}
 
-	if (q.empty())
-		answer++;
+	return true;
 }
 
 int main()
@@ -72,25 +74,48 @@ int main()
 	input();
 
 	//row 체크
+	cout << "row" << "\n";
 	for (int i = 0; i < n; i++)
 	{
-		queue<int> q;
-		for (int j = 0; j < n; j++)
+		bool isRoad = true;
+		for (int j = 0; j < n - 1; j++)
 		{
-			q.push(board[i][j]);
+			if (checkRoad(i, j) == false)
+			{
+				cout << i << " : false" << "\n";
+				isRoad = false;
+				break;
+			}
 		}
-		checkRoad(q);
+
+		if (isRoad)
+		{
+			cout << i << " : true" << "\n";
+			answer++;
+		}
 	}
 
 	//col 체크
+	cout << "col" << "\n";
 	for (int i = 0; i < n; i++)
 	{
-		queue<int> q;
-		for (int j = 0; j < n; j++)
+		bool isRoad = true;
+		for (int j = 0; j < n - 1; j++)
 		{
-			q.push(board[j][i]);
+			if (checkRoad(j, i) == false)
+			{
+				cout << i << " : false" << "\n";
+				isRoad = false;
+				break;
+			}
 		}
-		checkRoad(q);
+
+		if (isRoad)
+		{
+			cout << i << " : true" << "\n";
+			answer++;
+		}
+
 	}
 
 	cout << answer << "\n";
