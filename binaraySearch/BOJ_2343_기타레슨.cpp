@@ -2,31 +2,28 @@
 
 using namespace std;
 
-int n, m, answer, arr[100000];
+int n, m, answer, arr[100001];
 
 bool checkBluraySize(int size)
 {
-	int tempSize = size;
-	int cnt = 0;
-	for (int i = 0; i < n; i++) 
+	for (int i = 0; i < n; i++)
 	{
-		if (arr[i] > size) 
+		if (arr[i] > size)
 		{
 			return false;
 		}
 	}
 
+	int tempSize = size;
+	int cnt = 0;
 	for (int i = 0; i < n; i++)
 	{
-		if (tempSize - arr[i] > 0)
+		if (size - arr[i] < 0)
 		{
-			tempSize -= arr[i];
-		}
-		else
-		{
-			tempSize = size - arr[i];
+			size = tempSize;
 			cnt++;
 		}
+		size -= arr[i];
 	}
 
 	if (tempSize != size)
