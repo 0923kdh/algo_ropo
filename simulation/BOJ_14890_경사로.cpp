@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int n, l, answer, isFlatRoad, board[100][100], visited[100][100];
+int n, l, board1[100][100], board2[100][100];
 
 void input()
 {
@@ -11,58 +11,69 @@ void input()
 	{
 		for (int j = 0; j < n; j++)
 		{
-			cin >> board[i][j];
+			cin >> board1[i][j];
+			board2[j][i] = board1[i][j];
 		}
 	}
 }
 
-bool checkRoad(int& y, int& x)
+int go(int arr[][100])
 {
-	int cur = board[y][x];
-	int next = board[y][x + 1];
-
-	//차이가 2 이상날때는 지나갈 수 없다.
-	if (abs(board[y][x] - board[y][x + 1]) > 1)
-		return false;
-
-	//평평한 길은 일단 지나간다.
-	if (board[y][x] - board[y][x + 1] == 0)
-		return true;
-
-	//높은 경사로 //오른쪽이 더 큰 경우
-	if (board[y][x] - board[y][x + 1] == -1)
+	int asnwer = 0;
+	for (int i = 0; i < n; i++)
 	{
-		for (int i = 0; i < l; i++)
+		int len = 1;
+		bool isSucceed = true;
+		for (int j = 0; j < n - 1; j++)
 		{
-			if (visited[y][x - i])
-				return false;
+			if (abs(arr[i][j] - arr[i][j + 1]) > 1)
+			{
+				isSucceed = false;
+				break;
+			}
+
+			if (arr[i][j] == arr[i][j + 1])
+				len++;
+			//낮은곳->높은곳
+			else if (arr[i][j + 1] - arr[i][j] == 1)
+			{
+				if (len >= l)
+					len = 1;
+				else
+				{
+					isSucceed = false;
+					break;
+				}
+			}
+			//높은곳->낮은곳
+			else if (arr[i][j] - arr[i][j + 1] == 1)
+			{
+				if (j + 1 + l > n)
+				{
+					isSucceed = false;
+					break;
+				}
+
+				int height = arr[i][j + 1];
+				for (int k = j + 1; k < j + 1 + l; k++)
+				{
+					if (height != arr[i][k])
+					{
+						isSucceed = false;
+						break;
+					}
+				}
+
+				j += l - 1;
+				len = 0;
+			}
 		}
 
-		for (int i = 1; i < l; i++)
-		{
-			if (x - i < 0)
-				return false;
-
-			if (board[y][x] - board[y][x - i] != 0)
-				return false;
-		}
+		if (isSucceed)
+			asnwer++;
 	}
-	//낮은 경사로 //왼쪽이 더 큰 경우
-	else if (board[y][x] - board[y][x + 1] == 1)
-	{
-		for (int i = 1; i <= l; i++)
-		{
-			if (x + i >= n)
-				return false;
 
-			if (board[y][x + i] - board[y][x + i + 1] != 0)
-				return false;
-
-			visited[y][x + i] = 1;
-		}
-	}
-
-	return true;
+	return asnwer;
 }
 
 int main()
@@ -73,52 +84,7 @@ int main()
 
 	input();
 
-	//row 체크
-	cout << "row" << "\n";
-	for (int i = 0; i < n; i++)
-	{
-		bool isRoad = true;
-		for (int j = 0; j < n - 1; j++)
-		{
-			if (checkRoad(i, j) == false)
-			{
-				cout << i << " : false" << "\n";
-				isRoad = false;
-				break;
-			}
-		}
-
-		if (isRoad)
-		{
-			cout << i << " : true" << "\n";
-			answer++;
-		}
-	}
-
-	//col 체크
-	cout << "col" << "\n";
-	for (int i = 0; i < n; i++)
-	{
-		bool isRoad = true;
-		for (int j = 0; j < n - 1; j++)
-		{
-			if (checkRoad(j, i) == false)
-			{
-				cout << i << " : false" << "\n";
-				isRoad = false;
-				break;
-			}
-		}
-
-		if (isRoad)
-		{
-			cout << i << " : true" << "\n";
-			answer++;
-		}
-
-	}
-
-	cout << answer << "\n";
+	cout << go(board1) + go(board2) << '\n';
 
 	return 0;
 }
